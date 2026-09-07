@@ -6,4 +6,4 @@ Small script to automatically
 node --env-file=.env run-deploy.js
 ```
 
-<img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSHoF2kyF47n1bDnnPKLiuzr07jYfdod9HP5c7Vggvs_7MLdKbK8oZ7i-M&s">
+<img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ2JjPNp0NT0vBS-HNmegcJnaShd1VM12j5VY72C9nM0w&s=10">
