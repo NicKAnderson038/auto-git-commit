@@ -28,9 +28,7 @@ jobs:
           fi
 
       - name: Enable auto-merge via gh
-        run: gh api \
-          -X PUT /repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/enable-auto-merge \
-          -f merge_method=squash
+        run: gh api -X PUT /repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/enable-auto-merge -f merge_method=squash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
