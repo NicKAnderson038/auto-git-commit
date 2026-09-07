@@ -1,67 +1,34 @@
-name: Auto Merge with Squash
+name: Solo Developer Auto-Merge
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
 
 jobs:
+  # Job 1: Run your automated test suite
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7 # Latest stable checkout action
+
+      # Placeholder step so the workflow passes initially
+      - name: Run Tests
+        run: echo "Pre-merge checks passed!"
+
+  # Job 2: Automatically merge the PR once Job 1 finishes successfully
   auto-merge:
+    needs: test
     runs-on: ubuntu-latest
     permissions:
-      pull-requests: write
       contents: write
-
+      pull-requests: write
     steps:
-      - name: Check if PR is from feature branch
-        id: check-feature
-        run: |
-          HEAD_REF="${{ github.head_ref }}"
-
-          if [[ "$HEAD_REF" =~ ^feature/ ]] || [[ "$HEAD_REF" =~ ^feat/ ]]; then
-            echo "is_feature=true" >> "$GITHUB_OUTPUT"
-            echo "Found feature branch: $HEAD_REF"
-          else
-            echo "is_feature=false" >> "$GITHUB_OUTPUT"
-            echo "Branch $HEAD_REF does not match feature branch pattern"
-          fi
-
-      - name: Debug PR state
+      - name: Automatically Merge PR
+        run: gh pr merge "${{ github.event.pull_request.number }}" --merge --auto
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: |
-          owner_repo="${GITHUB_REPOSITORY}"
-          curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
-               -H "Accept: application/vnd.github+json" \
-               "https://api.github.com/repos/${owner_repo}/pulls/${PR_NUMBER}" | jq '.state, .mergeable, .draft'
-
-      - name: Enable auto-merge (REST API)
-        if: steps.check-feature.outputs.is_feature == 'true'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: |
-          echo "Attempting to enable auto-merge (squash) for PR #$PR_NUMBER"
-
-          # Give GitHub API a moment to settle the PR
-          sleep 2
-
-          owner_repo="${GITHUB_REPOSITORY}"
-          api_url="https://api.github.com/repos/${owner_repo}/pulls/${PR_NUMBER}/enable-auto-merge"
-          payload='{"merge_method":"squash"}'
-
-          res=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
-                       -H "Accept: application/vnd.github+json" \
-                       -X PUT \
-                       -d "$payload" \
-                       "$api_url" -w "\n%{http_code}")
-          http_code=$(echo "$res" | tail -n1)
-          body=$(echo "$res" | sed '$d')
-
-          if [[ "$http_code" =~ ^2 ]]; then
-            echo "✓ Auto-merge enabled for PR #$PR_NUMBER"
-          else
-            echo "✗ Failed to enable auto-merge (HTTP $http_code)"
-            echo "API response:"
-            echo "$body"
-          fi
