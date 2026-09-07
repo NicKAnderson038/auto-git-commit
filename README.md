@@ -1,6 +1,6 @@
 # auto-git-commit
 
-## Project Version (v1.0.7)
+## Project Version (v1.0.8)
 
 Small script to automatically
 
