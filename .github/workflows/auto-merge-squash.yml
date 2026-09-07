@@ -27,37 +27,44 @@ jobs:
             echo "Branch $HEAD_REF does not match feature branch pattern"
           fi
 
-      - name: Enable auto-merge with squash
-        if: steps.check-feature.outputs.is_feature == 'true'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const prNumber = context.payload.pull_request.number;
+      - name: Enable auto-merge via gh
+        run: gh api \
+          -X PUT /repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/enable-auto-merge \
+          -f merge_method=squash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-            // Check if the PR is ready to merge
-            const pr = await github.rest.pulls.get({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: prNumber,
-            });
+      # - name: Enable auto-merge with squash
+      #   if: steps.check-feature.outputs.is_feature == 'true'
+      #   uses: actions/github-script@v7
+      #   with:
+      #     script: |
+      #       const prNumber = context.payload.pull_request.number;
 
-            if (pr.data.mergeable === false) {
-              console.log('PR has merge conflicts. Skipping auto-merge.');
-              return;
-            }
+      #       // Check if the PR is ready to merge
+      #       const pr = await github.rest.pulls.get({
+      #         owner: context.repo.owner,
+      #         repo: context.repo.repo,
+      #         pull_number: prNumber,
+      #       });
 
-            // Enable auto-merge with squash
-            try {
-              await github.rest.pulls.enableAutoMerge({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: prNumber,
-                merge_method: 'squash',
-                commit_title: pr.data.title,
-                commit_message: `${pr.data.title}\n\nPR #${prNumber}`,
-              });
-              
-              console.log(`✓ Auto-merge with squash enabled for PR #${prNumber}`);
-            } catch (error) {
-              console.log(`Failed to enable auto-merge: ${error.message}`);
-            }
+      #       if (pr.data.mergeable === false) {
+      #         console.log('PR has merge conflicts. Skipping auto-merge.');
+      #         return;
+      #       }
+
+      #       // Enable auto-merge with squash
+      #       try {
+      #         await github.rest.pulls.enableAutoMerge({
+      #           owner: context.repo.owner,
+      #           repo: context.repo.repo,
+      #           pull_number: prNumber,
+      #           merge_method: 'squash',
+      #           commit_title: pr.data.title,
+      #           commit_message: `${pr.data.title}\n\nPR #${prNumber}`,
+      #         });
+
+      #         console.log(`✓ Auto-merge with squash enabled for PR #${prNumber}`);
+      #       } catch (error) {
+      #         console.log(`Failed to enable auto-merge: ${error.message}`);
+      #       }
