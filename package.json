@@ -1,0 +1,12 @@
+{
+  "name": "auto-git-commit",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "deploy": "node --env-file=.env run-deploy.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

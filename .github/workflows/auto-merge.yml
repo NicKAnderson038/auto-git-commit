@@ -2,10 +2,12 @@ name: Auto-Merge and Delete Branch
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
+    branches:
+      - main # The branch you want to merge INTO
 jobs:
   auto-merge:
     # Bypasses drafts and only runs when the PR is ready for review
-    if: github.event.pull_request.draft == false
+    # if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
