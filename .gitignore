@@ -1,0 +1,44 @@
+# --- Environment / Secrets ---
+.env
+.env.local
+.env.*.local
+*.env
+
+# --- Dependencies / Package Managers ---
+node_modules/
+bower_components/
+jspm_packages/
+
+# --- Build / Output Directories ---
+dist/
+build/
+out/
+target/
+bin/
+obj/
+
+# --- Logs and Runtime Files ---
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.eslintcache
+
+# --- OS Generated Files ---
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# --- IDEs / Editors ---
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
