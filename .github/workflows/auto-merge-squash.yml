@@ -33,6 +33,9 @@ jobs:
         run: |
           echo "Attempting to enable auto-merge (squash) for PR #$PR_NUMBER"
 
+          # Give GitHub API a moment to settle the PR
+          sleep 2
+
           owner_repo="${GITHUB_REPOSITORY}"
           api_url="https://api.github.com/repos/${owner_repo}/pulls/${PR_NUMBER}/enable-auto-merge"
           payload='{"merge_method":"squash"}'
