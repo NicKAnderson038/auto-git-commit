@@ -122,12 +122,12 @@ echo "Committing with message: $AI_COMMIT_MSG"
 git commit -m "$AI_COMMIT_MSG"
 
 echo "========== 6. Pushing new branch to remote repository =========="
-git push origin "$AI_BRANCH_NAME"
-# git push -u origin "$AI_BRANCH_NAME" && \
-# gh pr create --base main --head "$AI_BRANCH_NAME" --title "$AI_COMMIT_MSG" --body "$AI_COMMIT_MSG" && \
-# gh pr merge --squash --delete-branch && \
-git checkout main
-# git pull origin main
+# git push origin "$AI_BRANCH_NAME"
+git push -u origin "$AI_BRANCH_NAME" && \
+gh pr create --base main --head "$AI_BRANCH_NAME" --title "$AI_COMMIT_MSG" --body "$AI_COMMIT_MSG" && \
+gh pr merge --squash --delete-branch && \
+git checkout main && \
+git pull origin main
 
 # echo "========== 7. Post-push cleanup & sync =========="
 # # Get the exact unique commit hash we just pushed
