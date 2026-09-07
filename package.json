@@ -1,10 +1,10 @@
 {
   "name": "auto-git-commit",
-  "version": "1.0.9",
+  "version": "1.1.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "deploy": "node --env-file=.env run-deploy.js",
+    "deploy": "node --env-file=.env run-branch-merge.js",
     "version": "node update-readme.js"
   },
   "keywords": [],

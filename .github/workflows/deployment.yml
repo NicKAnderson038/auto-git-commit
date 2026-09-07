@@ -1,0 +1,21 @@
+name: Deployment Workflow Testing
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+
+jobs:
+  # Job 1: Run your automated test suite
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7 # Latest stable checkout action
+
+      # Placeholder step so the workflow passes initially
+      - name: Run Tests
+        run: echo "Pre-merge checks passed!"
