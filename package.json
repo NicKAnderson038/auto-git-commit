@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "deploy": "node --env-file=.env run-deploy.js"
+    "deploy": "node --env-file=.env run-deploy.js",
+    "version": "node update-readme.js"
   },
   "keywords": [],
   "author": "",
