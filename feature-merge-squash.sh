@@ -122,47 +122,8 @@ echo "Committing with message: $AI_COMMIT_MSG"
 git commit -m "$AI_COMMIT_MSG"
 
 echo "========== 6. Pushing new branch to remote repository =========="
-# git push origin "$AI_BRANCH_NAME"
 git push -u origin "$AI_BRANCH_NAME" && \
 gh pr create --base main --head "$AI_BRANCH_NAME" --title "$AI_COMMIT_MSG" --body "$AI_COMMIT_MSG" && \
 gh pr merge --squash --delete-branch && \
 git checkout main && \
 git pull origin main
-
-# echo "========== 7. Post-push cleanup & sync =========="
-# # Get the exact unique commit hash we just pushed
-# LOCAL_COMMIT_HASH=$(git rev-parse HEAD)
-
-# echo "Switching back to local $MAIN_BRANCH branch..."
-# git checkout "$MAIN_BRANCH"
-
-# echo "Waiting for remote main branch to include our new commit..."
-# MAX_ATTEMPTS=30
-# ATTEMPT=1
-# MERGED=false
-
-# while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
-#     # Fetch remote main status silently
-#     git fetch origin "$MAIN_BRANCH" > /dev/null 2>&1
-    
-#     # Check if our commit hash exists inside the history of origin/main
-#     if git merge-base --is-ancestor "$LOCAL_COMMIT_HASH" "origin/$MAIN_BRANCH" 2>/dev/null; then
-#         echo "Success! Detected our commit inside the remote main branch history."
-#         MERGED=true
-#         break
-#     fi
-
-#     echo "Attempt $ATTEMPT/$MAX_ATTEMPTS: Commit not merged yet. Retrying in 10 seconds..."
-#     sleep 10
-#     ATTEMPT=$((ATTEMPT + 1))
-# done
-
-# if [ "$MERGED" = "false" ]; then
-#     echo "Warning: Auto-merge timed out on the remote repository."
-# else
-#     echo "Pulling down the newly auto-merged changes..."
-#     git pull origin "$MAIN_BRANCH"
-# fi
-
-# echo "Deleting the temporary feature branch locally ($AI_BRANCH_NAME)..."
-# git branch -D "$AI_BRANCH_NAME"
