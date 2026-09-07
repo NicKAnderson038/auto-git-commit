@@ -1,0 +1,63 @@
+name: Auto Merge with Squash
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  auto-merge:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: write
+
+    steps:
+      - name: Check if PR is from feature branch
+        id: check-feature
+        run: |
+          # Get the head branch name (source branch)
+          HEAD_REF="${{ github.head_ref }}"
+
+          # Check if branch starts with "feature/" or similar patterns
+          if [[ "$HEAD_REF" =~ ^feature/ ]] || [[ "$HEAD_REF" =~ ^feat/ ]]; then
+            echo "is_feature=true" >> $GITHUB_OUTPUT
+            echo "Found feature branch: $HEAD_REF"
+          else
+            echo "is_feature=false" >> $GITHUB_OUTPUT
+            echo "Branch $HEAD_REF does not match feature branch pattern"
+          fi
+
+      - name: Enable auto-merge with squash
+        if: steps.check-feature.outputs.is_feature == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = context.payload.pull_request.number;
+
+            // Check if the PR is ready to merge
+            const pr = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber,
+            });
+
+            if (pr.data.mergeable === false) {
+              console.log('PR has merge conflicts. Skipping auto-merge.');
+              return;
+            }
+
+            // Enable auto-merge with squash
+            try {
+              await github.rest.pulls.enableAutoMerge({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber,
+                merge_method: 'squash',
+                commit_title: pr.data.title,
+                commit_message: `${pr.data.title}\n\nPR #${prNumber}`,
+              });
+              
+              console.log(`✓ Auto-merge with squash enabled for PR #${prNumber}`);
+            } catch (error) {
+              console.log(`Failed to enable auto-merge: ${error.message}`);
+            }

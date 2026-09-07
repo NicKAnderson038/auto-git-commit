@@ -94,7 +94,7 @@ RAW_BRANCH_NAME=$(ask_gemini "$BRANCH_PROMPT")
 AI_BRANCH_NAME=$(echo "$RAW_BRANCH_NAME" | tr -d '"'\''`' | tr ' ' '-' | tr -d '\r\n' | sed 's/[^a-zA-Z0-9-]*//g' | tr '[:upper:]' '[:lower:]')
 
 if [ -z "$AI_BRANCH_NAME" ] || [ "$AI_BRANCH_NAME" = "null" ]; then
-    AI_BRANCH_NAME="deploy-gemini-ai-$(date +%Y%m%d%H%M%S)"
+    AI_BRANCH_NAME="feature/gemini-ai-$(date +%Y%m%d%H%M%S)"
 fi
 
 echo "Creating and switching to branch: $AI_BRANCH_NAME"
