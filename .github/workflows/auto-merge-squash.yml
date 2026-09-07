@@ -25,6 +25,16 @@ jobs:
             echo "Branch $HEAD_REF does not match feature branch pattern"
           fi
 
+      - name: Debug PR state
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          owner_repo="${GITHUB_REPOSITORY}"
+          curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
+               -H "Accept: application/vnd.github+json" \
+               "https://api.github.com/repos/${owner_repo}/pulls/${PR_NUMBER}" | jq '.state, .mergeable, .draft'
+
       - name: Enable auto-merge (REST API)
         if: steps.check-feature.outputs.is_feature == 'true'
         env:
@@ -40,7 +50,6 @@ jobs:
           api_url="https://api.github.com/repos/${owner_repo}/pulls/${PR_NUMBER}/enable-auto-merge"
           payload='{"merge_method":"squash"}'
 
-          # call API, capture body and HTTP code
           res=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
                        -H "Accept: application/vnd.github+json" \
                        -X PUT \
@@ -55,6 +64,4 @@ jobs:
             echo "✗ Failed to enable auto-merge (HTTP $http_code)"
             echo "API response:"
             echo "$body"
-            # non-zero exit to surface failure if you prefer:
-            # exit 1
           fi
