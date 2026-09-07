@@ -1,32 +1,18 @@
-name: Auto-Merge and Branch Cleanup
+name: Auto-Merge and Delete Branch
 
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
 
 jobs:
-  automation-pipeline:
+  auto-merge:
     runs-on: ubuntu-latest
+    # Grant permissions to modify pull requests and contents
     permissions:
       pull-requests: write
       contents: write
 
     steps:
-      - name: Checkout Code Base
-        uses: actions/checkout@v4
-
-      # ==========================================
-      # 🚀 FUTURE ENHANCEMENTS GO HERE
-      # Examples: Linter, Security Scanning, Webhooks
-      # ==========================================
-      - name: Placeholder for Future Task
-        run: |
-          echo "This is where your future tasks will execute before merging."
-          # e.g., npm run lint, python security_scan.py, etc.
-
-      # ==========================================
-      # 💥 FINAL MERGE & CLEANUP STAGE
-      # ==========================================
       - name: Enable Auto-Merge and Delete Branch
         run: gh pr merge "${{ github.event.pull_request.html_url }}" --auto --squash --delete-branch
         env:
