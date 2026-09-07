@@ -40,7 +40,6 @@ ask_gemini() {
 }
 
 echo "========== 0. Staging all local working changes =========="
-# Automatically track and stage modified, deleted, and untracked files
 git add .
 
 echo "========== 1. Fetching latest code =========="
@@ -83,7 +82,6 @@ fi
 echo "========== 3. Creating a new branch based on changes =========="
 STAGED_DIFF=$(git diff --cached --stat)
 
-# Quick exit guard if there are zero files modified/added
 if [ -z "$STAGED_DIFF" ]; then
     echo "Error: No staged changes found to commit. Make sure you edited your files."
     exit 1
@@ -93,7 +91,6 @@ BRANCH_PROMPT="Analyze the following git diff summary of the code changes being 
 
 RAW_BRANCH_NAME=$(ask_gemini "$BRANCH_PROMPT")
 
-# Strip quotes, backticks, spaces, or extra noise safely
 AI_BRANCH_NAME=$(echo "$RAW_BRANCH_NAME" | tr -d '"'\''`' | tr ' ' '-' | tr -d '\r\n' | sed 's/[^a-zA-Z0-9-]*//g' | tr '[:upper:]' '[:lower:]')
 
 if [ -z "$AI_BRANCH_NAME" ] || [ "$AI_BRANCH_NAME" = "null" ]; then
@@ -115,7 +112,6 @@ COMMIT_PROMPT="Analyze the following git diff summary of the changes being commi
 
 RAW_COMMIT_MSG=$(ask_gemini "$COMMIT_PROMPT")
 
-# Strip quotes and remove unexpected prefixes safely
 AI_COMMIT_MSG=$(echo "$RAW_COMMIT_MSG" | tr -d '"'\''`' | tr -d '\r\n' | sed 's/^Commit message: //I')
 
 if [ -z "$AI_COMMIT_MSG" ] || [ "$AI_COMMIT_MSG" = "null" ]; then
@@ -128,4 +124,40 @@ git commit -m "$AI_COMMIT_MSG"
 echo "========== 6. Pushing new branch to remote repository =========="
 git push origin "$AI_BRANCH_NAME"
 
-echo "Workflow complete! Branch $AI_BRANCH_NAME successfully pushed."
+echo "========== 7. Post-push cleanup & sync =========="
+# Get the exact unique commit hash we just pushed
+LOCAL_COMMIT_HASH=$(git rev-parse HEAD)
+
+echo "Switching back to local $MAIN_BRANCH branch..."
+git checkout "$MAIN_BRANCH"
+
+echo "Waiting for remote main branch to include our new commit..."
+MAX_ATTEMPTS=30
+ATTEMPT=1
+MERGED=false
+
+while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
+    # Fetch remote main status silently
+    git fetch origin "$MAIN_BRANCH" > /dev/null 2>&1
+    
+    # Check if our commit hash exists inside the history of origin/main
+    if git merge-base --is-ancestor "$LOCAL_COMMIT_HASH" "origin/$MAIN_BRANCH" 2>/dev/null; then
+        echo "Success! Detected our commit inside the remote main branch history."
+        MERGED=true
+        break
+    fi
+
+    echo "Attempt $ATTEMPT/$MAX_ATTEMPTS: Commit not merged yet. Retrying in 10 seconds..."
+    sleep 10
+    ATTEMPT=$((ATTEMPT + 1))
+done
+
+if [ "$MERGED" = "false" ]; then
+    echo "Warning: Auto-merge timed out on the remote repository."
+else
+    echo "Pulling down the newly auto-merged changes..."
+    git pull origin "$MAIN_BRANCH"
+fi
+
+echo "Deleting the temporary feature branch locally ($AI_BRANCH_NAME)..."
+git branch -D "$AI_BRANCH_NAME"
