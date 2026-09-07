@@ -126,4 +126,5 @@ git push -u origin "$AI_BRANCH_NAME" && \
 gh pr create --base main --head "$AI_BRANCH_NAME" --title "$AI_COMMIT_MSG" --body "$AI_COMMIT_MSG" && \
 gh pr merge --squash --delete-branch && \
 git checkout main && \
-git pull origin main
+git pull origin main && \
+git branch -d "$AI_BRANCH_NAME"
